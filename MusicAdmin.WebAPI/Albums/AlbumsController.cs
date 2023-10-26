@@ -1,0 +1,52 @@
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using MusicDomain;
+using MusicDomain.Entity;
+using MusicInfrastructure;
+
+namespace MusicAdmin.WebAPI.Albums
+{
+    [Route("api/[controller]/[action]")]
+    [ApiController]
+    [UnitOfWork(typeof(MusicDBContext))]
+    public class AlbumsController : ControllerBase
+    {
+        private readonly MusicDBContext musicDBContext;
+        private readonly MusicDomainService musicDomainService;
+        private readonly IMusicRepository musicRepository;
+
+        public AlbumsController(
+            MusicDBContext musicDBContext,
+            MusicDomainService musicDomainService,
+            IMusicRepository musicRepository
+        )
+        {
+            this.musicDBContext = musicDBContext;
+            this.musicDomainService = musicDomainService;
+            this.musicRepository = musicRepository;
+        }
+        [HttpGet]
+        public async Task<ActionResult<Album[]>> GetAll()
+        {
+            return await musicRepository.GetAlbumsAsync();
+        }
+
+        [HttpGet]
+        public async Task<ActionResult<Album?>> GetAlbumById(Guid albumId)
+        {
+            return await musicRepository.GetAlbumByIdAsync(albumId);
+        }
+
+        [HttpGet]
+        public async Task<ActionResult<Album[]>> GetAlbumByName(string name)
+        {
+            return await musicRepository.GetAlbumByNameAsync(name);
+        }
+
+        [HttpGet]
+        public async Task<ActionResult<Album[]>> GetAlbumByArtistId(Guid artistId)
+        {
+            return await musicRepository.GetAlbumsByArtistIdAsync(artistId);
+        }
+    }
+}
