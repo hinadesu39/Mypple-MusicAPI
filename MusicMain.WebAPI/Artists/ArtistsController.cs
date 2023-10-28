@@ -34,13 +34,13 @@ namespace MusicMain.WebAPI.Artists
         }
 
         [HttpGet]
-        public async Task<ActionResult<Artist?>> GetArtistById(Guid artistId)
+        public async Task<ActionResult<Artist?>> GetById(Guid artistId)
         {
             return await musicRepository.GetArtistByIdAsync(artistId);
         }
 
         [HttpGet]
-        public async Task<ActionResult<Artist[]>> GetArtistByName(string name)
+        public async Task<ActionResult<Artist[]>> GetByName(string name)
         {
             return await musicRepository.GetArtistByNameAsync(name);
         }

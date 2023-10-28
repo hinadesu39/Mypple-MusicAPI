@@ -82,19 +82,19 @@ namespace MusicAdmin.WebAPI.Musics
         }
 
         [HttpGet]
-        public async Task<ActionResult<Music[]>> GetMusicByName(string keyWords)
+        public async Task<ActionResult<Music[]>> GetByName(string keyWords)
         {
             return await musicRepository.GetMusicsByNameAsync(keyWords);
         }
 
         [HttpGet]
-        public async Task<ActionResult<Music[]>> GetMusicByAlbumId(Guid albumId)
+        public async Task<ActionResult<Music[]>> GetByAlbumId(Guid albumId)
         {
             return await musicRepository.GetMusicsByAlbumIdAsync(albumId);
         }
 
         [HttpGet]
-        public async Task<ActionResult<Music[]>> GetMusicByArtistId(Guid artistId)
+        public async Task<ActionResult<Music[]>> GetByArtistId(Guid artistId)
         {
             return await musicRepository.GetMusicsByArtistIdAsync(artistId);
         }

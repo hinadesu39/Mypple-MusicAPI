@@ -32,21 +32,26 @@ namespace MusicMain.WebAPI.Musics
         {
             return await musicRepository.GetMusicsAsync();
         }
-
         [HttpGet]
-        public async Task<ActionResult<Music[]>> GetMusicByName(string keyWords)
+        public async Task<ActionResult<Music?>> GetById(Guid id)
         {
-            return await musicRepository.GetMusicsByNameAsync(keyWords);
+            return await musicRepository.GetMusicByIdAsync(id);
         }
 
         [HttpGet]
-        public async Task<ActionResult<Music[]>> GetMusicByAlbumId(Guid albumId)
+        public async Task<ActionResult<Music[]>> GetByName(string name)
+        {
+            return await musicRepository.GetMusicsByNameAsync(name);
+        }
+
+        [HttpGet]
+        public async Task<ActionResult<Music[]>> GetByAlbumId(Guid albumId)
         {
             return await musicRepository.GetMusicsByAlbumIdAsync(albumId);
         }
 
         [HttpGet]
-        public async Task<ActionResult<Music[]>> GetMusicByArtistId(Guid artistId)
+        public async Task<ActionResult<Music[]>> GetByArtistId(Guid artistId)
         {
             return await musicRepository.GetMusicsByArtistIdAsync(artistId);
         }
