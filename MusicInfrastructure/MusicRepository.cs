@@ -2,6 +2,7 @@
 using MusicDomain;
 using MusicDomain.Entity;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -75,7 +76,37 @@ namespace MusicInfrastructure
 
         public async Task<Music[]> GetMusicsByArtistIdAsync(Guid ArtistId)
         {
-           return await dbContext.Musics.Where(m => m.ArtistId == ArtistId).ToArrayAsync();
+            return await dbContext.Musics.Where(m => m.ArtistId == ArtistId).ToArrayAsync();
+        }
+
+        public async Task<Album[]> GetAlbumsByMusicPostOrder()
+        {
+            var musicList = await dbContext.Musics.OrderByDescending(m => m.CreationTime).ToArrayAsync();
+            var musicId = musicList.Select(m => m.AlbumId).Distinct();
+            List<Album> albums = new List<Album>();
+            var tempAlbum = await dbContext.Albums.ToArrayAsync();
+            foreach (var id in musicId)
+            {
+                albums.Add(tempAlbum.FirstOrDefault(a => a.Id == id));
+            }
+            return albums.ToArray();
+
+
+        }
+
+        public Task<Music[]> GetMusicsByPlayListIdAsync(Guid PlayListId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<PlayList[]> GetPlayListAsync()
+        {
+           return await dbContext.PlayLists.ToArrayAsync();
+        }
+
+        public async Task<PlayList[]> GetPlayListByNameAsync(string Name)
+        {
+           return await dbContext.PlayLists.Where(p => p.Title.Contains(Name)).ToArrayAsync();
         }
     }
 }

@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using MusicAdmin.WebAPI;
 using MusicDomain;
 using MusicInfrastructure;
+using StackExchange.Redis;
 
 namespace MusicMain.WebAPI
 {
@@ -18,6 +19,14 @@ namespace MusicMain.WebAPI
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+
+            //redis
+            string redisConnStr = builder.Configuration.GetValue<string>("Redis:ConnStr");
+            IConnectionMultiplexer redisConnMultiplexer = ConnectionMultiplexer.Connect(redisConnStr);
+            builder.Services.AddSingleton(typeof(IConnectionMultiplexer), redisConnMultiplexer);
+
+            //»º´æ
+            builder.Services.AddMemoryCache();
 
             //Êý¾Ý¿â
             builder.Services.AddDbContext<MusicDBContext>(ctx =>

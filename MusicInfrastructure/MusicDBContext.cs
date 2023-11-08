@@ -12,17 +12,18 @@ namespace MusicInfrastructure
     {
         private readonly DbContextOptions<MusicDBContext> options;
 
-        public DbSet<Music> Musics { get; private set; }//不要忘了写set，否则拿到的DbContext的Categories为null
+        public DbSet<Music> Musics { get; private set; } //不要忘了写set，否则拿到的DbContext的Categories为null
         public DbSet<Album> Albums { get; private set; }
         public DbSet<Artist> Artists { get; private set; }
-        public MusicDBContext(DbContextOptions<MusicDBContext> options) : base(options)
-        {
+        public DbSet<PlayList> PlayLists { get; private set; }
 
-        }
+        public MusicDBContext() { }
+
+        public MusicDBContext(DbContextOptions<MusicDBContext> options)
+            : base(options) { }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-
             string connection_str = Environment.GetEnvironmentVariable("DefaultDB:ConnStr");
             optionsBuilder.UseSqlServer(connection_str);
         }
@@ -34,6 +35,7 @@ namespace MusicInfrastructure
             modelBuilder.Entity<Music>().HasQueryFilter(p => !p.IsDeleted);
             modelBuilder.Entity<Album>().HasQueryFilter(p => !p.IsDeleted);
             modelBuilder.Entity<Artist>().HasQueryFilter(p => !p.IsDeleted);
+            modelBuilder.Entity<PlayList>().HasQueryFilter(p => !p.IsDeleted);
         }
     }
 }

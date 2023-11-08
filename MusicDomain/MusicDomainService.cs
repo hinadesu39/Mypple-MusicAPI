@@ -35,7 +35,7 @@ namespace MusicDomain
         /// <param name="Title">专辑名称</param>
         /// <param name="ArtistId">所属歌手</param>
         /// <param name="Type">类型</param>
-        /// <param name="PublishTime">发行事件</param>
+        /// <param name="PublishTime">发行时间</param>
         /// <returns></returns>
         public async Task<Album> AddAlbum(
             Uri? PicUrl,
@@ -89,6 +89,16 @@ namespace MusicDomain
                 Lyric,
                 PublishTime
             );
+        }
+
+        public async Task<PlayList> AddPlayList()
+        {
+
+        }
+
+        public async Task<Music> AddMusicToPlayList()
+        {
+
         }
     }
 }
