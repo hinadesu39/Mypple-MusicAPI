@@ -90,15 +90,5 @@ namespace MusicDomain
                 PublishTime
             );
         }
-
-        public async Task<PlayList> AddPlayList()
-        {
-
-        }
-
-        public async Task<Music> AddMusicToPlayList()
-        {
-
-        }
     }
 }

@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using MusicAdmin.WebAPI;
 using MusicDomain;
 using MusicInfrastructure;
@@ -20,11 +22,6 @@ namespace MusicMain.WebAPI
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
-            //redis
-            string redisConnStr = builder.Configuration.GetValue<string>("Redis:ConnStr");
-            IConnectionMultiplexer redisConnMultiplexer = ConnectionMultiplexer.Connect(redisConnStr);
-            builder.Services.AddSingleton(typeof(IConnectionMultiplexer), redisConnMultiplexer);
-
             //缓存
             builder.Services.AddMemoryCache();
 
@@ -36,6 +33,14 @@ namespace MusicMain.WebAPI
                 string connStr = builder.Configuration.GetValue<string>("DefaultDB:ConnStr");
                 ctx.UseSqlServer(connStr);
             });
+            // 配置读取from数据库
+            string connStr = builder.Configuration.GetValue<string>("DefaultDB:ConnStr");
+            builder.Configuration.AddDbConfiguration(() => new SqlConnection(connStr), reloadOnChange: true, reloadInterval: TimeSpan.FromSeconds(5));
+
+            //redis
+            string redisConnStr = builder.Configuration.GetValue<string>("Redis:ConnStr");
+            IConnectionMultiplexer redisConnMultiplexer = ConnectionMultiplexer.Connect(redisConnStr);
+            builder.Services.AddSingleton(typeof(IConnectionMultiplexer), redisConnMultiplexer);
 
             //工作单元注入
             builder.Services.Configure<MvcOptions>(o =>

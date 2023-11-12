@@ -6,6 +6,7 @@ using MusicDomain;
 using MusicInfrastructure;
 using Microsoft.Extensions.Caching.Memory;
 using System.Xml.Linq;
+using MusicDomain.Entity.DTO;
 
 namespace MusicMain.WebAPI.Musics
 {
@@ -105,6 +106,22 @@ namespace MusicMain.WebAPI.Musics
                 {
                     e.SetSlidingExpiration(TimeSpan.FromMinutes(Random.Shared.Next(30, 45)));
                     return await musicRepository.GetMusicsByArtistIdAsync(artistId);
+                }
+            );
+            if (Music == null)
+                return NotFound();
+            return Music;
+        }
+
+        [HttpGet]
+        public async Task<ActionResult<MusicDTO[]>> GetByPlayListId(Guid playListId)
+        {
+            var Music = await memoryCache.GetOrCreateAsync(
+                $"MusicsController.GetByPlayListId.{playListId}",
+                async (e) =>
+                {
+                    e.SetSlidingExpiration(TimeSpan.FromMinutes(Random.Shared.Next(30, 45)));
+                    return await musicRepository.GetMusicsByPlayListIdAsync(playListId);
                 }
             );
             if (Music == null)

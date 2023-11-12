@@ -6,13 +6,13 @@ namespace MusicAdmin.WebAPI.Musics.Request
 {
     public record MusicAddRequest(
         Uri AudioUrl,
-        Uri? MusicPicUrl,
-        Uri? AlbumPicUrl,
-        Uri? ArtistPicUrl,
+        Uri? PicUrl,
         string Title,
         double Duration,
+        Guid ArtistId,
         string Artist,
         string Album,
+        Guid AlbumId,
         string? Type,
         string? Lyric,
         int PublishTime      

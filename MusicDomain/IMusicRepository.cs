@@ -1,4 +1,5 @@
 ﻿using MusicDomain.Entity;
+using MusicDomain.Entity.DTO;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,9 +25,11 @@ namespace MusicDomain
         public Task<Music[]> GetMusicsByNameAsync(string Name);
         public Task<Music[]> GetMusicsByAlbumIdAsync(Guid AlbumId);
         public Task<Music[]> GetMusicsByArtistIdAsync(Guid ArtistId);
-        public Task<Music[]> GetMusicsByPlayListIdAsync(Guid PlayListId);
 
-        public Task<PlayList[]> GetPlayListAsync();
-        public Task<PlayList[]> GetPlayListByNameAsync(string Name);
+        public Task<MusicDTO[]> GetMusicsByPlayListIdAsync(Guid PlayListId);
+        public Task<PlayListDTO[]> GetPlayListAsync();
+        public Task<PlayListDTO?> GetPlayListByIdAsync(Guid PlayListId);
+        public Task<PlayList> AddPlayListAsync(Uri? PicUrl,string Title,string Description);
+        public Task<Music[]> AddMusicToPlayListAsync(Guid PlayListId, Music[] musics);
     }
 }
