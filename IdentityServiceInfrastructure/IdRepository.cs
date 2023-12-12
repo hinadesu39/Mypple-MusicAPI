@@ -148,10 +148,10 @@ namespace IdentityServiceInfrastructure
             }
         }
 
-        public async Task<IdentityResult> CheckForCodeAsync(string phoneNum, string code)
+        public async Task<IdentityResult> CheckForCodeAsync(string account, string code)
         {
             var db = redisConn.GetDatabase();
-            var value = db.StringGet(phoneNum).ToString();
+            var value = db.StringGet(account).ToString();
             if (value != code || value == null)
             {
                 return ErrorResult("验证码错误，请重新发送");
@@ -218,6 +218,11 @@ namespace IdentityServiceInfrastructure
         public async Task<User?> FindByPhoneNumberAsync(string phoneNum)
         {
             return await userManager.Users.FirstOrDefaultAsync(u => u.PhoneNumber == phoneNum);
+        }
+
+        public async Task<User?> FindByEmailAsync(string email)
+        {
+            return await userManager.Users.FirstOrDefaultAsync(u => u.Email == email);
         }
 
         public async Task<string> GenerateChangePhoneNumberTokenAsync(User user, string phoneNumber)
@@ -312,5 +317,6 @@ namespace IdentityServiceInfrastructure
                 password.Append((char)random.Next(65, 91));
             return password.ToString();
         }
+
     }
 }

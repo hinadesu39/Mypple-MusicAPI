@@ -16,6 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\CommonHelper\CommonHelper.csproj" />
     <ProjectReference Include="..\IdentityDomain\IdentityServiceDomain.csproj" />
     <ProjectReference Include="..\IdentityServiceInfrastructure\IdentityServiceInfrastructure.csproj" />
   </ItemGroup>

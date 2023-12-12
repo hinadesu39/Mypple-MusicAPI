@@ -13,6 +13,7 @@ namespace IdentityServiceDomain
         Task<User?> FindByIdAsync(Guid userId); //根据Id获取用户
         Task<User?> FindByNameAsync(string userName); //根据用户名获取用户
         Task<User?> FindByPhoneNumberAsync(string phoneNum); //根据手机号获取用户
+        Task<User?> FindByEmailAsync(string email);
         Task<IdentityResult> CreateAsync(User user, string password); //创建用户
         Task<IdentityResult> AccessFailedAsync(User user); //记录一次登陆失败
         Task<IdentityResult> ResetAccessFailedCountAsync(User user); //重制登录失败次数
@@ -22,7 +23,7 @@ namespace IdentityServiceDomain
         /// </summary>
         /// <param name="phoneNum"></param>
         /// <returns></returns>
-        Task<IdentityResult> CheckForCodeAsync(string phoneNum, string code);
+        Task<IdentityResult> CheckForCodeAsync(string account, string code);
 
         /// <summary>
         /// 为新注册的用户的指定的手机号发验证码

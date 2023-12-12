@@ -63,7 +63,6 @@ namespace IdentityService.WebAPI
             //领域事件MediatR
             builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(Assembly.GetExecutingAssembly()));
 
-
             //开始:Authentication,Authorization
             //只要需要校验Authentication报文头的地方（非IdentityService.WebAPI项目）也需要启用这些
             //IdentityService项目还需要启用AddIdentityCore
@@ -88,6 +87,8 @@ namespace IdentityService.WebAPI
                 //三次登录失败锁定用户5分钟
                 options.Lockout.MaxFailedAccessAttempts = 3;
                 options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+
+                options.User.AllowedUserNameCharacters = null;
 
                 options.Password.RequireDigit = false;
                 options.Password.RequireLowercase = false;

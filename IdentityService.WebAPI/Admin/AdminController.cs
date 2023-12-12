@@ -45,7 +45,7 @@ namespace IdentityService.WebAPI.Admin
             //可以同时或者选择性的把新增用户的密码短信/邮件/打印给用户
             //体现了领域事件对于代码“高内聚、低耦合”的追求
             var userCreatedEvent = new UserCreatedEvent(user.Id, req.UserName, password, req.PhoneNum);
-            mediator.Publish(userCreatedEvent);
+            await mediator.Publish(userCreatedEvent);
             return Ok();
         }
 

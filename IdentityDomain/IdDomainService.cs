@@ -1,6 +1,7 @@
 ﻿using CommonHelper;
 using IdentityServiceDomain.Entity;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
@@ -95,6 +96,79 @@ namespace IdentityServiceDomain
             else
             {
                 return (result, null);
+            }
+        }
+
+        /// <summary>
+        /// 邮箱登录
+        /// </summary>
+        /// <param name="userName"></param>
+        /// <param name="password"></param>
+        /// <returns></returns>
+        public async Task<(SignInResult result, string? token)> LoginByEmailAndPwdAsync(
+            string email,
+            string password
+        )
+        {
+            var user = await repository.FindByEmailAsync(email);
+            if (user == null)
+            {
+                return (SignInResult.Failed, null);
+            }
+
+            var result = await repository.CheckForSignInAsync(user, password, true);
+            if (result.Succeeded)
+            {
+                string token = await BuildTokenAsync(user);
+                return (SignInResult.Success, token);
+            }
+            else
+            {
+                return (result, null);
+            }
+        }
+
+        public async Task<(SignInResult result, string? token)> LoginByPhoneAndCodeASync(
+            string phoneNum,
+            string code
+        )
+        {
+            var user = await repository.FindByPhoneNumberAsync(phoneNum);
+            if (user == null)
+            {
+                return (SignInResult.Failed, null);
+            }
+            var res = await repository.CheckForCodeAsync(phoneNum, code);
+            if (res.Succeeded)
+            {
+                var token = await BuildTokenAsync(user);
+                return (SignInResult.Success, token);
+            }
+            else
+            {
+                return (SignInResult.Failed, null);
+            }
+        }
+
+        public async Task<(SignInResult result, string? token)> LoginByEmailAndCodeASync(
+            string email,
+            string code
+        )
+        {
+            var user = await repository.FindByEmailAsync(email);
+            if (user == null)
+            {
+                return (SignInResult.Failed, null);
+            }
+            var res = await repository.CheckForCodeAsync(email, code);
+            if (res.Succeeded)
+            {
+                var token = await BuildTokenAsync(user);
+                return (SignInResult.Success, token);
+            }
+            else
+            {
+                return (SignInResult.Failed, null);
             }
         }
     }

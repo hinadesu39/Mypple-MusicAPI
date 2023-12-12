@@ -9,6 +9,10 @@ namespace IdentityServiceDomain.Entity
 {
     public class User : IdentityUser<Guid>
     {
+        public string? Gender { get; private set; }
+
+        public string? UserAvatar { get; private set; }
+
         public DateTime CreationTime { get; init; }
 
         public DateTime? DeletionTime { get; private set; }
