@@ -31,7 +31,13 @@ namespace FileServiceDomain
             //用日期把文件分散在不同文件夹存储，同时由于加上了文件hash值作为目录，又用用户上传的文件夹做文件名，
             //所以几乎不会发生不同文件冲突的可能
             //用用户上传的文件名保存文件名，这样用户查看、下载文件的时候，文件名更灵活
-            string key = $"{today.Year}/{today.Month}/{today.Day}/{fileName}";
+            string key = $"{today.Year}/{today.Month}/{today.Day}/{hash}/{fileName}";
+
+            var UploadedItem = await repository.FindFileAsync(fileSize, hash);
+            if (UploadedItem != null)
+            {
+                return UploadedItem;
+            }
 
             stream.Position = 0;
             Uri backUpUrl = await backupStorage.SaveAsync(key, stream, cancellationToken);

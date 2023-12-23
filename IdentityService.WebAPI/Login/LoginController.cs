@@ -13,6 +13,9 @@ using Microsoft.EntityFrameworkCore;
 using IdentityService.WebAPI.Admin;
 using CommonHelper;
 using System.Text.RegularExpressions;
+using System.Reflection.Metadata.Ecma335;
+using Microsoft.AspNetCore.Identity;
+using StackExchange.Redis;
 
 namespace IdentityService.WebAPI.Login
 {
@@ -24,18 +27,21 @@ namespace IdentityService.WebAPI.Login
         private readonly IdDomainService idService;
         private readonly IdUserManager userManager;
         private IMediator mediator;
+        private readonly IConnectionMultiplexer redisConn;
 
         public LoginController(
             IdDomainService idService,
             IIdRepository repository,
             IMediator mediator,
-            IdUserManager userManager
+            IdUserManager userManager,
+            IConnectionMultiplexer redisConn
         )
         {
             this.idService = idService;
             this.repository = repository;
             this.mediator = mediator;
             this.userManager = userManager;
+            this.redisConn = redisConn;
         }
 
         /// <summary>
@@ -82,6 +88,7 @@ namespace IdentityService.WebAPI.Login
                 user.Gender,
                 user.UserAvatar,
                 user.Email,
+                user.BirthDay,
                 user.CreationTime
             );
         }
@@ -159,8 +166,8 @@ namespace IdentityService.WebAPI.Login
             }
         }
 
-        [HttpPost]
         [Authorize]
+        [HttpPost]
         public async Task<ApiResponse<string?>> ChangeMyPassword(ChangeMyPasswordRequest req)
         {
             Guid userId = Guid.Parse(this.User.FindFirstValue(ClaimTypes.NameIdentifier));
@@ -205,6 +212,7 @@ namespace IdentityService.WebAPI.Login
                     user.Gender,
                     user.UserAvatar,
                     user.Email,
+                    user.BirthDay,
                     user.CreationTime
                 )
             );
@@ -311,6 +319,105 @@ namespace IdentityService.WebAPI.Login
             else
             {
                 return new ApiResponse<string?>("BadRequest", false, "登录失败");
+            }
+        }
+
+        [Authorize]
+        [HttpPost]
+        public async Task<ApiResponse<SimpleUser?>> UpdateUserInfo(UpdateUserInfoRequest req)
+        {
+            Guid userId = Guid.Parse(this.User.FindFirstValue(ClaimTypes.NameIdentifier));
+            (var res, var user) = await repository.UpdateUserInfoAsync(userId, req.UserName, req.Gender, req.BirthDay, req.UserAvatar);
+            if (res.Succeeded)
+            {
+                return new ApiResponse<SimpleUser?>("Succeeded", true, new SimpleUser(
+                    user.Id,
+                    user.UserName,
+                    user.PhoneNumber,
+                    user.Gender,
+                    user.UserAvatar,
+                    user.Email,
+                    user.BirthDay,
+                    user.CreationTime
+                ));
+            }
+            else
+            {
+                return new ApiResponse<SimpleUser?>("更新失败", false, null);
+            }
+        }
+
+        [Authorize]
+        [HttpPost]
+        public async Task<ApiResponse<string?>> ConfirmPhone(string phoneNumber)
+        {
+
+            Guid userId = Guid.Parse(this.User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var user = await userManager.FindByIdAsync(userId.ToString());
+            bool IsPhoneAlreadyRegistered = userManager.Users.Any(item => item.PhoneNumber == phoneNumber);
+            if (IsPhoneAlreadyRegistered)
+            {
+                return new ApiResponse<string?>("BadRequest", false, "该手机号已被注册！");
+            }
+            var token = await repository.GenerateChangePhoneNumberTokenAsync(user, phoneNumber);
+            var sendCodeEvent = new SendCodeByPhoneEvent(phoneNumber, token);
+            await mediator.Publish(sendCodeEvent);
+
+            var db = redisConn.GetDatabase();
+            await db.StringSetAsync(phoneNumber, token, TimeSpan.FromMinutes(5));
+            return new ApiResponse<string?>("Succeeded", true, token);
+        }
+
+        [Authorize]
+        [HttpPost]
+        public async Task<ApiResponse<string?>> ChangePhoneNum(ChangePhoneOrEmailRequest req)
+        {
+            Guid userId = Guid.Parse(this.User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var res = await repository.ChangePhoneNumAsync(userId, req.Account, req.Token);
+            if (res.Succeeded)
+            {
+                return new ApiResponse<string?>("Succeeded", true, "修改成功");
+            }
+            else
+            {
+                return new ApiResponse<string?>("BadRequest", false, "修改失败");
+            }
+        }
+
+        //[Authorize]
+        //[HttpPost]
+        //public async Task<ApiResponse<string?>> ConfirmEmail(string email)
+        //{
+        //    //Guid userId = Guid.Parse(this.User.FindFirstValue(ClaimTypes.NameIdentifier));
+        //    //var user = await userManager.FindByIdAsync(userId.ToString());
+        //    //var token = await repository.GenerateChangeEmailTokenAsync(user, email);
+        //    //var sendCodeEvent = new SendCodeByEmailEvent(email, token);
+        //    //await mediator.Publish(sendCodeEvent);
+
+        //    //var db = redisConn.GetDatabase();
+        //    //await db.StringSetAsync(email, token, TimeSpan.FromMinutes(5));
+        //    //return new ApiResponse<string?>("Succeeded", true, token);
+        //}
+
+        [Authorize]
+        [HttpPost]
+        public async Task<ApiResponse<string?>> ChangeEmail(ChangePhoneOrEmailRequest req)
+        {
+            var code = await repository.CheckForCodeAsync(req.Account, req.Token);
+            if (!code.Succeeded)
+                return new ApiResponse<string?>("BadRequest", false, "修改失败");
+
+            Guid userId = Guid.Parse(this.User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var user = await userManager.FindByIdAsync(userId.ToString());
+            var token = await repository.GenerateChangeEmailTokenAsync(user, req.Account);
+            var res = await repository.ChangeEmailAsync(userId, req.Account, token);
+            if (res.Succeeded)
+            {
+                return new ApiResponse<string?>(Message: "Succeeded", true, "修改成功");
+            }
+            else
+            {
+                return new ApiResponse<string?>("BadRequest", false, "修改失败");
             }
         }
 

@@ -63,7 +63,7 @@ namespace IdentityService.WebAPI
             //领域事件MediatR
             builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(Assembly.GetExecutingAssembly()));
 
-            //开始:Authentication,Authorization
+            # region Authentication,Authorization
             //只要需要校验Authentication报文头的地方（非IdentityService.WebAPI项目）也需要启用这些
             //IdentityService项目还需要启用AddIdentityCore
             builder.Services.AddAuthorization();
@@ -75,7 +75,7 @@ namespace IdentityService.WebAPI
             {
                 c.AddAuthenticationHeader();
             });
-            //结束:Authentication,Authorization
+            #endregion
 
             builder.Services.AddDataProtection();
             //登录、注册的项目除了要启用WebApplicationBuilderExtensions中的初始化之外，还要如下的初始化

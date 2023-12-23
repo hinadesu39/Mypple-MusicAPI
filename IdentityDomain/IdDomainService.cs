@@ -128,6 +128,12 @@ namespace IdentityServiceDomain
             }
         }
 
+        /// <summary>
+        /// 手机验证码登录
+        /// </summary>
+        /// <param name="phoneNum"></param>
+        /// <param name="code"></param>
+        /// <returns></returns>
         public async Task<(SignInResult result, string? token)> LoginByPhoneAndCodeASync(
             string phoneNum,
             string code
@@ -150,6 +156,12 @@ namespace IdentityServiceDomain
             }
         }
 
+        /// <summary>
+        /// 邮箱验证登录
+        /// </summary>
+        /// <param name="email"></param>
+        /// <param name="code"></param>
+        /// <returns></returns>
         public async Task<(SignInResult result, string? token)> LoginByEmailAndCodeASync(
             string email,
             string code

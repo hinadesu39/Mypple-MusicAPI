@@ -148,6 +148,25 @@ namespace IdentityServiceInfrastructure
             }
         }
 
+        public async Task<IdentityResult> ChangeEmailAsync(Guid userId, string email, string token)
+        {
+            var user = await userManager.FindByIdAsync(userId.ToString());
+            if (user == null)
+            {
+                return ErrorResult("该用户不存在");
+            }
+            var changeResult = await this.userManager.ChangeEmailAsync(user, email, token);
+            if (changeResult.Succeeded)
+            {
+                await ConfirmEmailAsync(userId);
+                return changeResult;
+            }
+            else
+            {
+                return ErrorResult("修改邮箱失败");
+            }
+        }
+
         public async Task<IdentityResult> CheckForCodeAsync(string account, string code)
         {
             var db = redisConn.GetDatabase();
@@ -200,6 +219,17 @@ namespace IdentityServiceInfrastructure
             await userManager.UpdateAsync(user);
         }
 
+        public async Task ConfirmEmailAsync(Guid id)
+        {
+            var user = await FindByIdAsync(id);
+            if (user == null)
+            {
+                throw new ArgumentException($"用户找不到，id={id}", nameof(id));
+            }
+            user.EmailConfirmed = true;
+            await userManager.UpdateAsync(user);
+        }
+
         public async Task<IdentityResult> CreateAsync(User user, string password)
         {
             return await userManager.CreateAsync(user, password);
@@ -228,6 +258,11 @@ namespace IdentityServiceInfrastructure
         public async Task<string> GenerateChangePhoneNumberTokenAsync(User user, string phoneNumber)
         {
             return await userManager.GenerateChangePhoneNumberTokenAsync(user, phoneNumber);
+        }
+
+        public async Task<string> GenerateChangeEmailTokenAsync(User user, string email)
+        {
+            return await userManager.GenerateChangeEmailTokenAsync(user, email);
         }
 
         public async Task<IList<string>> GetRolesAsync(User user)
@@ -275,8 +310,6 @@ namespace IdentityServiceInfrastructure
             return (IdentityResult.Success, user, password);
         }
 
-
-
         private static IdentityResult ErrorResult(string msg)
         {
             IdentityError idError = new IdentityError { Description = msg };
@@ -318,5 +351,14 @@ namespace IdentityServiceInfrastructure
             return password.ToString();
         }
 
+        public async Task<(IdentityResult, User?)> UpdateUserInfoAsync(Guid userId, string userName, string? Gender, DateTime? BirthDay, Uri? UserAvatar)
+        {
+            var user = await userManager.FindByIdAsync(userId.ToString());            
+            user.UserName = userName;
+            user.Gender = Gender;
+            user.BirthDay = BirthDay;
+            user.UserAvatar = UserAvatar;
+            return (await userManager.UpdateAsync(user),user);
+        }
     }
 }
