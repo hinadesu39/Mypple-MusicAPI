@@ -1,7 +1,9 @@
 ﻿using CommonHelper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using MusicAdmin.WebAPI.Albums.Request;
 using MusicAdmin.WebAPI.Musics.Request;
 using MusicDomain;
 using MusicDomain.Entity;
@@ -12,6 +14,7 @@ namespace MusicAdmin.WebAPI.Musics
     [Route("api/[controller]/[action]")]
     [ApiController]
     [UnitOfWork(typeof(MusicDBContext))]
+    [Authorize(Roles = "Admin")]
     public class MusicsController : ControllerBase
     {
         private readonly MusicDBContext musicDBContext;
@@ -30,34 +33,46 @@ namespace MusicAdmin.WebAPI.Musics
         }
 
         [HttpPost]
-        public async Task<ActionResult<Guid>> Add(MusicAddRequest req)
+        public async Task<ActionResult<string>> Add(MusicAddRequest req)
         {
             //如果该歌手不存在则创建
             var artist = await musicRepository.GetArtistByNameAsync(req.Artist);
             Artist newArtist;
-            if (artist.Length != 0)
-                newArtist = artist[0];
+            if (artist.Length != 0 && artist.FirstOrDefault(a => a.Name == req.Artist) != null)
+                newArtist = artist.FirstOrDefault(a => a.Name == req.Artist);
             else
             {
-                newArtist = await musicDomainService.AddArtist(req.ArtistPicUrl, req.Artist);
+                newArtist = await musicDomainService.AddArtist(req.MusicPicUrl, req.Artist);
                 await musicDBContext.AddAsync(newArtist);
             }
 
             //如果该专辑不存在则创建
             var album = await musicRepository.GetAlbumByNameAsync(req.Album);
             Album newAlbum;
-            if (album.Length != 0)
-                newAlbum = album[0];
+            if (album.Length != 0 && album.FirstOrDefault(a => a.Title == req.Album) != null)
+                newAlbum = album.FirstOrDefault(a => a.Title == req.Album);
             else
             {
-                newAlbum = await musicDomainService.AddAlbum(req.AlbumPicUrl, req.Album, req.Artist, newArtist.Id, req.Type, req.PublishTime);
+                newAlbum = await musicDomainService.AddAlbum(
+                    req.MusicPicUrl,
+                    req.Album,
+                    req.Artist,
+                    newArtist.Id,
+                    req.Type,
+                    req.PublishTime
+                );
                 await musicDBContext.AddAsync(newAlbum);
             }
 
             //如果该歌曲不存在则创建，否则直接返回
-            var music = await musicRepository.GetMusicsByNameAsync(req.Title);
-            if (music.Length != 0)
-                return music[0].Id;
+            var music = await musicRepository.MusicExist(
+                req.Title,
+                req.Duration,
+                req.Artist,
+                req.Album
+            );
+            if (music != null)
+                return music.Title;
             Music newMusic = await musicDomainService.AddMusic(
                 req.AudioUrl,
                 req.MusicPicUrl,
@@ -72,7 +87,7 @@ namespace MusicAdmin.WebAPI.Musics
                 req.PublishTime
             );
             await musicDBContext.AddAsync(newMusic);
-            return newMusic.Id;
+            return newMusic.Title;
         }
 
         [HttpGet]
@@ -99,17 +114,44 @@ namespace MusicAdmin.WebAPI.Musics
             return await musicRepository.GetMusicsByArtistIdAsync(artistId);
         }
 
-        [HttpDelete]
-        public async Task<ActionResult> DeleteById(Guid musicId)
+        [HttpPut]
+        public async Task<ActionResult<string>> Update(MusicUpdateRequest req)
         {
-            var music = await musicRepository.GetMusicByIdAsync(musicId);
-            if(music == null)
+            var music = await musicRepository.GetMusicByIdAsync(req.Id);
+            if (music == null)
             {
-                return NotFound($"没有Id={musicId}的Music");
+                return NotFound($"没有Id={req.Id}的Music");
+            }
+            else
+            {
+                music.Update(
+                    req.AudioUrl,
+                    req.MusicPicUrl,
+                    req.Title,
+                    req.Artist,
+                    req.ArtistId,
+                    req.Album,
+                    req.AlbumId,
+                    req.Type,
+                    req.Lyric,
+                    req.PublishTime
+                );
+                return Ok("OK");
+            }
+        }
+
+        [Route("{id}")]
+        [HttpDelete]
+        public async Task<ActionResult<string>> DeleteById(Guid id)
+        {
+            var music = await musicRepository.GetMusicByIdAsync(id);
+            if (music == null)
+            {
+                return NotFound($"没有Id={id}的Music");
             }
             //软删除
             music.SoftDelete();
-            return Ok(music);
+            return Ok("Ok");
         }
     }
 }

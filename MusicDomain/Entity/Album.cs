@@ -17,7 +17,7 @@ namespace MusicDomain.Entity
         /// <summary>
         /// 专辑图片
         /// </summary>
-        public Uri? PicUrl { get; private set; }
+        public Uri? PicUrl { get;private set; }
 
         /// <summary>
         /// 专辑名
@@ -76,6 +76,23 @@ namespace MusicDomain.Entity
                 Type = Type,
                 PublishTime = PublishTime
             };
+        }
+
+        public void Update(
+            Uri? PicUrl,
+            string Title,
+            Guid ArtistId,
+            string Artist,
+            string? Type,
+            int PublishTime
+        )
+        {
+            this.PicUrl = PicUrl;
+            this.Title = Title;
+            this.Artist = Artist;
+            this.ArtistId = ArtistId;
+            this.Type = Type;
+            this.PublishTime = PublishTime;
         }
     }
 }

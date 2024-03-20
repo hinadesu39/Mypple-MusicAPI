@@ -67,7 +67,7 @@ namespace MusicDomain
             Uri? PicUrl,
             string Title,
             double Duration,
-            string Artist,  
+            string Artist,
             Guid ArtistId,
             string Album,
             Guid AlbumId,

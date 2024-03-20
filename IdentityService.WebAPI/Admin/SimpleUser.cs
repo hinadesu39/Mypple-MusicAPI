@@ -8,12 +8,13 @@ namespace IdentityService.WebAPI.Admin
         string PhoneNumber,
         string? Gender,
         Uri? UserAvatar,
-        string Email,
+        string? Email,
         DateTime? BirthDay,
-        DateTime CreationTime
+        DateTime CreationTime,
+        bool isAdmin
     )
     {
-        public static SimpleUser Create(User user)
+        public static SimpleUser Create(User user,bool isAdmin)
         {
             return new SimpleUser(
                 user.Id,
@@ -23,7 +24,8 @@ namespace IdentityService.WebAPI.Admin
                 user.UserAvatar,
                 user.Email,
                 user.BirthDay,
-                user.CreationTime
+                user.CreationTime,
+                isAdmin
             );
         }
     }

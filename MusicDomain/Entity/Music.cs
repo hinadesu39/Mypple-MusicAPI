@@ -121,5 +121,30 @@ namespace MusicDomain.Entity
                 PublishTime = PublishTime
             };
         }
+
+        public void Update(
+            Uri AudioUrl,
+            Uri? PicUrl,
+            string Title,
+            string Artist,
+            Guid ArtistId,
+            string Album,
+            Guid AlbumId,
+            string? Type,
+            string? Lyric,
+            int PublishTime
+        )
+        {
+            this.AudioUrl = AudioUrl;
+            this.PicUrl = PicUrl;
+            this.Title = Title;
+            this.Artist = Artist;
+            this.ArtistId = ArtistId;
+            this.Album = Album;
+            this.AlbumId = AlbumId;
+            this.Type = Type;
+            this.Lyric = Lyric;
+            this.PublishTime = PublishTime;
+        }
     }
 }

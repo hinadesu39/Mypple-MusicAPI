@@ -1,3 +1,4 @@
+using CommonHelper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
@@ -5,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using MusicDomain;
 using MusicInfrastructure;
 using StackExchange.Redis;
+using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace MusicAdmin.WebAPI
 {
@@ -46,6 +48,21 @@ namespace MusicAdmin.WebAPI
                 o.Filters.Add<UnitOfWorkFilter>();
             });
 
+            #region Authentication,Authorization
+            //只要需要校验Authentication报文头的地方（非IdentityService.WebAPI项目）也需要启用这些
+            //IdentityService项目还需要启用AddIdentityCore
+            builder.Services.AddAuthentication();
+            builder.Services.AddAuthorization();
+
+            JWTOptions jwtOpt = builder.Configuration.GetSection("JWT").Get<JWTOptions>();
+            builder.Services.AddJWTAuthentication(jwtOpt);
+            //启用Swagger中的【Authorize】按钮。
+            builder.Services.Configure<SwaggerGenOptions>(c =>
+            {
+                c.AddAuthenticationHeader();
+            });
+            #endregion
+
             //基础设施层注入
             builder.Services.AddScoped<MusicDomainService>();
             builder.Services.AddScoped<IMusicRepository, MusicRepository>();
@@ -59,6 +76,7 @@ namespace MusicAdmin.WebAPI
                 app.UseSwaggerUI();
             }
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
 

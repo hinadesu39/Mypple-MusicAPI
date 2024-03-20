@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using MusicAdmin.WebAPI;
@@ -6,7 +6,9 @@ using MusicDomain;
 using MusicDomain.Entity;
 using MusicDomain.Entity.DTO;
 using MusicInfrastructure;
+using MusicInfrastructure.Migrations;
 using MusicMain.WebAPI.PlayLists.Request;
+using System.Security.Claims;
 
 namespace MusicMain.WebAPI.PlayLists
 {
@@ -24,15 +26,17 @@ namespace MusicMain.WebAPI.PlayLists
             this.memoryCache = memoryCache;
         }
 
+        [Authorize]
         [HttpGet]
         public async Task<ActionResult<PlayListDTO[]>> GetAll()
         {
+            Guid userId = Guid.Parse(this.User.FindFirstValue(ClaimTypes.NameIdentifier));
             var playList = await memoryCache.GetOrCreateAsync(
-                $"PlayListController.GetAll",
+                $"PlayListController.GetAll.{userId}",
                 async (e) =>
                 {
                     e.SetSlidingExpiration(TimeSpan.FromMinutes(Random.Shared.Next(30, 45)));
-                    return await musicRepository.GetPlayListAsync();
+                    return await musicRepository.GetPlayListAsync(userId);
                 }
             );
             if (playList == null)
@@ -40,26 +44,33 @@ namespace MusicMain.WebAPI.PlayLists
             return playList;
         }
 
+        [Authorize]
         [HttpGet]
         public async Task<ActionResult<PlayListDTO>> GetById(Guid id)
         {
+            Guid userId = Guid.Parse(this.User.FindFirstValue(ClaimTypes.NameIdentifier));
             var playList = await memoryCache.GetOrCreateAsync(
-              $"PlayListController.GetById",
-              async (e) =>
-              {
-                  e.SetSlidingExpiration(TimeSpan.FromMinutes(Random.Shared.Next(30, 45)));
-                  return await musicRepository.GetPlayListByIdAsync(id);
-              }
-          );
+                $"PlayListController.GetById.{id}",
+                async (e) =>
+                {
+                    e.SetSlidingExpiration(TimeSpan.FromMinutes(Random.Shared.Next(30, 45)));
+                    return await musicRepository.GetPlayListByIdAsync(userId, id);
+                }
+            );
             if (playList == null)
                 return NotFound();
             return playList;
         }
 
+        [Authorize]
         [HttpPost]
         public async Task<ActionResult<PlayList>> Add(PlayListAddRequest request)
         {
+            Guid userId = Guid.Parse(this.User.FindFirstValue(ClaimTypes.NameIdentifier));
+            //删除旧缓存
+            memoryCache.Remove($"PlayListController.GetAll.{userId}");
             return await musicRepository.AddPlayListAsync(
+                userId,
                 request.PicUrl,
                 request.Title,
                 request.Description
@@ -89,7 +100,42 @@ namespace MusicMain.WebAPI.PlayLists
                         )
                 )
                 .ToArray();
+            //删除旧缓存
+            memoryCache.Remove($"MusicsController.GetByPlayListId.{request.PlayListId}");
             return await musicRepository.AddMusicToPlayListAsync(request.PlayListId, musicList);
-        }   
+        }
+
+        [HttpGet]
+        public async Task<ActionResult<MusicDTO[]>> GetByPlayListId(Guid playListId)
+        {
+            var Music = await memoryCache.GetOrCreateAsync(
+                $"MusicsController.GetByPlayListId.{playListId}",
+                async (e) =>
+                {
+                    e.SetSlidingExpiration(TimeSpan.FromMinutes(Random.Shared.Next(30, 45)));
+                    return await musicRepository.GetMusicsByPlayListIdAsync(playListId);
+                }
+            );
+            if (Music == null)
+                return NotFound();
+            return Music;
+        }
+
+        [HttpPost]
+        public async Task<ActionResult<bool>> RemoveMusicFromPlayList(RemoveMusicFromPlayListRequest req)
+        {
+            return await musicRepository.RemoveMusicFromPlayListAsync(req.PlayListId, req.MusicId);
+        }
+
+        [Authorize]
+        [HttpDelete]
+        public async Task<ActionResult<bool>> Delete(Guid id)
+        {
+            //删除旧缓存
+            Guid userId = Guid.Parse(this.User.FindFirstValue(ClaimTypes.NameIdentifier));
+            memoryCache.Remove($"PlayListController.GetAll.{userId}");
+            memoryCache.Remove($"PlayListController.GetById.{id}");
+            return await musicRepository.RemovePlayListAsync(userId, id);
+        }
     }
 }

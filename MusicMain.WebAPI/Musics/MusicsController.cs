@@ -114,19 +114,10 @@ namespace MusicMain.WebAPI.Musics
         }
 
         [HttpGet]
-        public async Task<ActionResult<MusicDTO[]>> GetByPlayListId(Guid playListId)
+        public async Task<ActionResult<SearchedResult>> GetByKeyWords(string keyWords)
         {
-            var Music = await memoryCache.GetOrCreateAsync(
-                $"MusicsController.GetByPlayListId.{playListId}",
-                async (e) =>
-                {
-                    e.SetSlidingExpiration(TimeSpan.FromMinutes(Random.Shared.Next(30, 45)));
-                    return await musicRepository.GetMusicsByPlayListIdAsync(playListId);
-                }
-            );
-            if (Music == null)
-                return NotFound();
-            return Music;
+            return await musicRepository.GetByKeyWordsAsync(keyWords);
         }
+
     }
 }

@@ -8,6 +8,7 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.Extensions.Configuration;
+using Serilog;
 using System.Data;
 
 namespace FileService.WebAPI
@@ -37,6 +38,16 @@ namespace FileService.WebAPI
                 //注册全局的filter
                 o.Filters.Add<UnitOfWorkFilter>();
             });
+
+            //日志信息输出
+            builder.Services.AddLogging(builder =>
+            {
+                Log.Logger = new LoggerConfiguration()
+                   .WriteTo.File("FileService.log")
+                   .CreateLogger();
+                builder.AddSerilog();
+            });
+            Log.Logger.Information("hello");
 
             ////文件大小限制
             //builder.Services.Configure<IISServerOptions>(options =>

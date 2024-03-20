@@ -59,8 +59,8 @@ namespace IdentityService.WebAPI.Login
             User user = new User("admin");
             await repository.CreateAsync(user, "123456");
 
-            var token = await repository.GenerateChangePhoneNumberTokenAsync(user, "19550595456");
-            await repository.ChangePhoneNumAsync(user.Id, "19550595456", token);
+            var token = await repository.GenerateChangePhoneNumberTokenAsync(user, "13989537646");
+            await repository.ChangePhoneNumAsync(user.Id, "13989537646", token);
 
             await repository.AddToRoleAsync(user, "User");
 
@@ -89,7 +89,8 @@ namespace IdentityService.WebAPI.Login
                 user.UserAvatar,
                 user.Email,
                 user.BirthDay,
-                user.CreationTime
+                user.CreationTime,
+                false
             );
         }
 
@@ -213,7 +214,8 @@ namespace IdentityService.WebAPI.Login
                     user.UserAvatar,
                     user.Email,
                     user.BirthDay,
-                    user.CreationTime
+                    user.CreationTime,
+                    false
                 )
             );
         }
@@ -338,7 +340,8 @@ namespace IdentityService.WebAPI.Login
                     user.UserAvatar,
                     user.Email,
                     user.BirthDay,
-                    user.CreationTime
+                    user.CreationTime,
+                    false
                 ));
             }
             else

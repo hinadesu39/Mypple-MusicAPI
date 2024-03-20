@@ -1,30 +1,33 @@
-﻿using CommonHelper;
-using FluentValidation;
+﻿using FluentValidation;
 using MusicInfrastructure;
 
 namespace MusicAdmin.WebAPI.Musics.Request
 {
-    public record MusicAddRequest(
+    public record MusicUpdateRequest(
+        Guid Id,
         Uri AudioUrl,
         Uri? MusicPicUrl,
         string Title,
-        double Duration,
+        Guid ArtistId,
         string Artist,
+        Guid AlbumId,
         string Album,
         string? Type,
         string? Lyric,
-        int PublishTime      
+        int PublishTime
     );
 
-    public class MusicAddRequestValidator : AbstractValidator<MusicAddRequest>
+    public class MusicUpdateRequestValidator : AbstractValidator<MusicUpdateRequest>
     {
-        public MusicAddRequestValidator(MusicDBContext ctx)
+        public MusicUpdateRequestValidator(MusicDBContext ctx)
         {
+            RuleFor(x => x.Id).NotEmpty();
             RuleFor(x => x.AudioUrl).NotEmpty();
             RuleFor(x => x.Title).NotEmpty().Length(1, 200);
-            RuleFor(x => x.Duration != 0);
             RuleFor(x => x.Artist).NotEmpty().Length(1, 200);
+            RuleFor(x => x.ArtistId).NotEmpty();
             RuleFor(x => x.Album).NotEmpty().Length(1, 200);
+            RuleFor(x => x.AlbumId).NotEmpty();
             RuleFor(x => x.PublishTime != 0);
         }
     }

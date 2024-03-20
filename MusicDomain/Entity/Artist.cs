@@ -17,13 +17,13 @@ namespace MusicDomain.Entity
         /// <summary>
         /// 歌手图片
         /// </summary>
-        public Uri? PicUrl { get; private set; }
+        public Uri? PicUrl { get; set; }
 
         /// <summary>
         /// 歌手名
         /// </summary>
 
-        public string Name { get; private set; }
+        public string Name { get; set; }
 
         /// <summary>
         /// 通用属性
@@ -40,6 +40,12 @@ namespace MusicDomain.Entity
         public static Artist Create(Uri picUrl, string Name)
         {
             return new Artist() { PicUrl = picUrl, Name = Name };
+        }
+
+        public void Update(Uri? PicUrl, string Name)
+        {
+            this.PicUrl = PicUrl;
+            this.Name = Name;
         }
     }
 }

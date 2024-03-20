@@ -66,8 +66,9 @@ namespace IdentityService.WebAPI
             # region Authentication,Authorization
             //只要需要校验Authentication报文头的地方（非IdentityService.WebAPI项目）也需要启用这些
             //IdentityService项目还需要启用AddIdentityCore
-            builder.Services.AddAuthorization();
             builder.Services.AddAuthentication();
+            builder.Services.AddAuthorization();
+            
             JWTOptions jwtOpt = builder.Configuration.GetSection("JWT").Get<JWTOptions>();
             builder.Services.AddJWTAuthentication(jwtOpt);
             //启用Swagger中的【Authorize】按钮。

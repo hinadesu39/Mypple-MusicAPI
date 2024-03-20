@@ -1,8 +1,10 @@
-﻿using FileServiceDomain;
+﻿using CommonHelper;
+using FileServiceDomain;
 using FileServiceInfrastructure;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Diagnostics;
 
 namespace FileService.WebAPI.Uploader
 {
@@ -13,21 +15,25 @@ namespace FileService.WebAPI.Uploader
         private readonly FileServiceDBContext fSDBContext;
         private readonly FileDomainService fSDomainService;
         private readonly IFSRepository fSRepository;
+        private readonly ILogger<UploaderController> logger;
 
         public UploaderController(
             FileServiceDBContext fSDBContext,
             FileDomainService fSDomainService,
-            IFSRepository fSRepository
+            IFSRepository fSRepository,
+            ILogger<UploaderController> logger
         )
         {
             this.fSDBContext = fSDBContext;
             this.fSDomainService = fSDomainService;
             this.fSRepository = fSRepository;
+            this.logger = logger;
         }
 
         [HttpGet]
         public async Task<FileExistsResponse> FileExists(long fileSize, string sha256Hash)
         {
+            logger.LogWarning($"文件长度{fileSize},哈希值{sha256Hash}");
             var item = await fSRepository.FindFileAsync(fileSize, sha256Hash);
             if (item == null)
             {
@@ -49,21 +55,13 @@ namespace FileService.WebAPI.Uploader
         {
             var file = request.File;
             string fileName = file.FileName;
-
-            var itme = await fSDBContext.UploadItems.FirstOrDefaultAsync(
-                x => x.FileName == fileName
-            );
-            if (itme != null)
+            using Stream stream = file.OpenReadStream();
+            var (upItem, res) = await fSDomainService.UploadAsync(stream, fileName, cancellationToken);
+            if (!res)
             {
-                return itme.RemoteUrl;
-            }
-            else
-            {
-                using Stream stream = file.OpenReadStream();
-                var upItem = await fSDomainService.UploadAsync(stream, fileName, cancellationToken);
                 fSDBContext.Add(upItem);
-                return upItem.RemoteUrl;
             }
+            return upItem.RemoteUrl;
         }
     }
 }

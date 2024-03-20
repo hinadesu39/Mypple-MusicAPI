@@ -23,7 +23,7 @@ namespace FileServiceDomain
             this.remoteStorage = storageClients.First(c => c.StorageType == StorageType.Public);
         }
 
-        public async Task<UploadedItem> UploadAsync(Stream stream, string fileName, CancellationToken cancellationToken)
+        public async Task<(UploadedItem,bool)> UploadAsync(Stream stream, string fileName, CancellationToken cancellationToken)
         {
             string hash = HashHelper.ComputeSha256Hash(stream);
             long fileSize = stream.Length;
@@ -36,7 +36,7 @@ namespace FileServiceDomain
             var UploadedItem = await repository.FindFileAsync(fileSize, hash);
             if (UploadedItem != null)
             {
-                return UploadedItem;
+                return (UploadedItem,true);
             }
 
             stream.Position = 0;
@@ -47,7 +47,7 @@ namespace FileServiceDomain
             //领域服务并不会真正的执行数据库插入，只是把实体对象生成，然后由应用服务和基础设施配合来真正的插入数据库！
             //DDD中尽量避免直接在领域服务中执行数据库的修改（包含删除、新增）操作。
             Guid guid = Guid.NewGuid();
-            return UploadedItem.Create(guid, fileSize, fileName, hash, backUpUrl, remoteUrl);
+            return (UploadedItem.Create(guid, fileSize, fileName, hash, backUpUrl, remoteUrl),false);
         }
     }
 }
