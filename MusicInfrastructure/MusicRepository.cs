@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using MusicDomain;
 using MusicDomain.Entity;
 using MusicDomain.Entity.DTO;
-using MusicInfrastructure.Migrations;
 using Newtonsoft.Json;
 using StackExchange.Redis;
 

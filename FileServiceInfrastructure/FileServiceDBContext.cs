@@ -12,10 +12,12 @@ namespace FileServiceInfrastructure
     {
         public DbSet<UploadedItem> UploadItems { get; private set; }
 
+        public FileServiceDBContext() { }
+
         public FileServiceDBContext(DbContextOptions<FileServiceDBContext> options)
-            : base(options) 
+            : base(options)
         {
-            
+
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
