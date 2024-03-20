@@ -45,7 +45,7 @@ namespace IdentityService.WebAPI.Login
         }
 
         /// <summary>
-        /// 仅供测试
+        /// 仅供测试，正式版本不该出现下面这个代码
         /// </summary>
         /// <returns></returns>
         [HttpPost]
@@ -59,8 +59,8 @@ namespace IdentityService.WebAPI.Login
             User user = new User("admin");
             await repository.CreateAsync(user, "123456");
 
-            var token = await repository.GenerateChangePhoneNumberTokenAsync(user, "13989537646");
-            await repository.ChangePhoneNumAsync(user.Id, "13989537646", token);
+            var token = await repository.GenerateChangePhoneNumberTokenAsync(user, "18999999999");
+            await repository.ChangePhoneNumAsync(user.Id, "18999999999", token);
 
             await repository.AddToRoleAsync(user, "User");
 
