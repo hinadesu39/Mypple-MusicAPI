@@ -1,0 +1,12 @@
+FileService:SMB	{"WorkingDir":"d:/temp"}
+Redis		{"ConnStr":"localhost"}
+JWT		{"Issuer":"MyIssuer","Audience":"MyAudience","Key":"hinadesu@39music","ExpireSeconds":31536000}
+
+DefaultDB:ConnStr	Data Source=DESKTOP-RGR9UNQ;Database=Mypple Music;Trusted_Connection=True
+
+
+redis以及nginx安装，nginx配置文件更改
+数据库建库Mypple Music，建T_Configs表
+数据库连接字符串放在环境变量中
+在微服务基础设施层使用EFCore迁移数据库
+上传文件时可能会报413错误，要在iis中修改相关配置，limits300000000
